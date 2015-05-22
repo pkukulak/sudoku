@@ -1,6 +1,7 @@
 module SudokuExamples where
 
 import Sudoku
+import Data.Maybe
 
 example1 :: Sudoku
 example1 = Sudoku

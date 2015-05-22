@@ -162,7 +162,7 @@ isOkayBlock :: Block -> Bool
 isOkayBlock [] = True
 isOkayBlock (b:bs) =
     case b of
-        Just x -> not $ b `elem` bs
+        Just x -> (not $ b `elem` bs) && isOkayBlock bs
         Nothing -> isOkayBlock bs
 
 -- |Returns all Blocks of the given Sudoku.
@@ -223,6 +223,8 @@ isUpdated (Sudoku s) (x, y) n =
     let     rs = rows (Sudoku s)
     in      (rs !! x !! y) == n
 
+-- |Solves a given Sudoku. Returns Nothing if there is
+--  no solution.
 solve :: Sudoku -> Maybe Sudoku
 solve sud = 
     case isOkay sud of
@@ -236,6 +238,8 @@ solve sud =
                             solveAll = map solve allPossible
                     in      firstSolution solveAll
 
+-- |Returns the first solution in a list of all possible
+--  solutions to a Sudoku.                        
 firstSolution :: [Maybe Sudoku] -> Maybe Sudoku
 firstSolution [] = Nothing
 firstSolution (x:xs) =
