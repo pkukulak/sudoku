@@ -101,7 +101,8 @@ allBlankSudokuHelper n = allBlankRow ++ allBlankSudokuHelper (n - 1)
 
 -- |A row containing all blank cells.
 allBlankRow :: [Block]
-allBlankRow = [[Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]]
+allBlankRow = [replicate 9 Nothing]
+
 
 -- |Returns True if and only if the input is a valid Sudoku puzzle.
 isSudoku :: Sudoku -> Bool
@@ -246,8 +247,3 @@ firstSolution (x:xs) =
     case x of
         Nothing -> firstSolution xs
         _ -> x
-    
-             
-
-
-
