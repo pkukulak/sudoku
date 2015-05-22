@@ -37,7 +37,6 @@ maybeToString (x:xs) =
     case x of
         Just n -> (show n) ++ maybeToString xs
         Nothing -> '.' : maybeToString xs
-{- ################################# -}
 
 {- ########## CODE TO ###########
    ####### READ SUDOKUS ######### -}
@@ -66,7 +65,6 @@ sudokuLine (x:xs) =
     case x of
         '.' -> Nothing : sudokuLine xs
         c -> Just (digitToInt c) : sudokuLine xs
-{- ################################## -}
         
 -- |Extract rows from a given Sudoku.
 rows :: Sudoku -> [Block]
@@ -186,9 +184,7 @@ blank :: Sudoku -> Maybe Pos
 blank (Sudoku s) =
     let     rs = rows (Sudoku s)
             blanks = allBlanks rs
-    in      case blanks of
-        [] -> Nothing
-        _ -> Just $ head blanks
+    in      listToMaybe blanks
     
 -- |Returns all blank positions in the given Sudoku.
 allBlanks :: [Block] -> [Pos]
@@ -228,8 +224,18 @@ isUpdated (Sudoku s) (x, y) n =
     in      (rs !! x !! y) == n
 
 solve :: Sudoku -> Maybe Sudoku
-solve sud = undefined
-
+solve sud = 
+    case isOkay sud of
+        False -> Nothing
+        True -> 
+            case blank sud of
+                Nothing -> Just sud
+                Just (x, y) ->
+                    let     toSolve = update sud (x, y)
+                            allPossible = map toSolve [Just n | n <- [1..9]]
+                            solveAll = map solve allPossible
+                    in      head solveAll
+             
 
 
 
