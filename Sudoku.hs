@@ -234,7 +234,15 @@ solve sud =
                     let     toSolve = update sud (x, y)
                             allPossible = map toSolve [Just n | n <- [1..9]]
                             solveAll = map solve allPossible
-                    in      head solveAll
+                    in      firstSolution solveAll
+
+firstSolution :: [Maybe Sudoku] -> Maybe Sudoku
+firstSolution [] = Nothing
+firstSolution (x:xs) =
+    case x of
+        Nothing -> firstSolution xs
+        _ -> x
+    
              
 
 
