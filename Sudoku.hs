@@ -24,14 +24,14 @@ printSudoku s =
     in      mapM_ putStrLn $ init sudokuStr
 
 -- |Converts a Sudoku into a list of Strings.
-sudokuToString :: [[Maybe Int]] -> [String]
+sudokuToString :: [Block] -> [String]
 sudokuToString [] = [[]]
 sudokuToString (r:rs) =
     maybeToString r : sudokuToString rs
 
 -- |Converts a list of Maybe Ints to a String.
 --  Could probably be written in a cleaner way.
-maybeToString :: [Maybe Int] -> String
+maybeToString :: Block -> String
 maybeToString [] = []
 maybeToString (x:xs) =
     case x of
@@ -52,7 +52,7 @@ readSudoku path =
 -- |Reads a list of Strings representing all rows
 --  of a Sudoku puzzle and converts it into a list of
 --  list of Maybe Int.
-linesToSudoku :: [String] -> [[Maybe Int]]
+linesToSudoku :: [String] -> [Block]
 linesToSudoku [] = [[]]
 linesToSudoku (l:ls) =
     sudokuLine l : linesToSudoku ls
@@ -60,7 +60,7 @@ linesToSudoku (l:ls) =
 -- |Reads a single String representing a single
 --  row of a Sudoku puzzle, converting it to a list
 --  Maybe Int.
-sudokuLine :: String -> [Maybe Int]
+sudokuLine :: String -> Block
 sudokuLine [] = []
 sudokuLine (x:xs) =
     case x of
@@ -69,58 +69,40 @@ sudokuLine (x:xs) =
 {- ################################## -}
         
 -- |Extract rows from a given Sudoku.
-rows :: Sudoku -> [[Maybe Int]]
+rows :: Sudoku -> [Block]
 rows (Sudoku rs) = rs
 
 -- |Extract columns from a given Sudoku.
-columns :: Sudoku -> [[Maybe Int]]
+columns :: Sudoku -> [Block]
 columns (Sudoku s) = 
     let     rs = rows (Sudoku s)
     in      [map (head . drop i) rs | i <- [0..8]]
 
 -- |Extract 3x3 blocks from a given Sudoku.
-threeByThrees :: Sudoku -> [[Maybe Int]]
+threeByThrees :: Sudoku -> [Block]
 threeByThrees (Sudoku s) =
     let     rs = rows (Sudoku s)
             blx = [map (take 3 . drop i) rs | i <- init [0,3..9]]
             segmentedBlx = concat blx
     in      combineBlocks segmentedBlx
 
+-- |A helper function used to combine 3x3 segments of lists of lists.
 combineBlocks :: [[a]] -> [[a]]
 combineBlocks [] = []
 combineBlocks blk =
     (concat $ take 3 blk) : (combineBlocks $ drop 3 blk)
-
-example :: Sudoku
-example = Sudoku
-      [ [Just 3, Just 6, Nothing,Nothing,Just 7, Just 1, Just 2, Nothing,Nothing]
-      , [Nothing,Just 5, Nothing,Nothing,Nothing,Nothing,Just 1, Just 8, Nothing]
-      , [Nothing,Nothing,Just 9, Just 2, Nothing,Just 4, Just 7, Nothing,Nothing]
-      , [Nothing,Nothing,Nothing,Nothing,Just 1, Just 3, Nothing,Just 2, Just 8]
-      , [Just 4, Nothing,Nothing,Just 5, Nothing,Just 2, Nothing,Nothing,Just 9]
-      , [Just 2, Just 7, Nothing,Just 4, Just 6, Nothing,Nothing,Nothing,Nothing]
-      , [Nothing,Nothing,Just 5, Just 3, Nothing,Just 8, Just 9, Nothing,Nothing]
-      , [Nothing,Just 8, Just 3, Nothing,Nothing,Nothing,Nothing,Just 6, Nothing]
-      , [Nothing,Nothing,Just 7, Just 6, Just 9, Nothing,Nothing,Just 4, Just 3]
-      ]
-
-invalidExample :: Sudoku
-invalidExample = Sudoku
-    [ [Just 3, Just 6, Nothing]
-    , [Nothing, Nothing]
-    ]
 
 -- |A Sudoku containing only blank cells.
 allBlankSudoku :: Sudoku
 allBlankSudoku = Sudoku (allBlankSudokuHelper 9)
 
 -- |Helper for generating blank Sudokus.
-allBlankSudokuHelper :: Int -> [[Maybe Int]]
+allBlankSudokuHelper :: Int -> [Block]
 allBlankSudokuHelper 1 = allBlankRow
 allBlankSudokuHelper n = allBlankRow ++ allBlankSudokuHelper (n - 1)
 
 -- |A row containing all blank cells.
-allBlankRow :: [[Maybe Int]]
+allBlankRow :: [Block]
 allBlankRow = [[Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing, Nothing]]
 
 -- |Returns True if and only if the input is a valid Sudoku puzzle.
@@ -134,17 +116,17 @@ isSudoku (Sudoku s) =
 isSudoku _ = False
 
 -- |Calculates the number of entries in the Sudoku.
-numberOfEntries :: [[Maybe Int]] -> Int
+numberOfEntries :: [Block] -> Int
 numberOfEntries (r:rs) = length r + numberOfEntries rs
 numberOfEntries [] = 0
 
 -- |Returns True if and only if all entries in the Sudoku are valid.
-allValidEntries :: [[Maybe Int]] -> Bool
+allValidEntries :: [Block] -> Bool
 allValidEntries (r:[]) = validRow r
 allValidEntries (r:rs) = validRow r && allValidEntries rs
 
 -- |Check if a row in the given Sudoku is valid
-validRow :: [Maybe Int] -> Bool
+validRow :: Block -> Bool
 validRow (x:[]) =
     case x of
         Just _ -> True
@@ -162,12 +144,12 @@ isSolved (Sudoku s) =
     noNothings (rows (Sudoku s))
 
 -- |Returns True if and only if there are no Nothings in the Sudoku.
-noNothings :: [[Maybe Int]] -> Bool
+noNothings :: [Block] -> Bool
 noNothings (r:[]) = noNothingsRow r
 noNothings (r:rs) = noNothingsRow r && noNothings rs
 
 -- |Returns True if and only if every entry in the row is not Nothing
-noNothingsRow :: [Maybe Int] -> Bool
+noNothingsRow :: Block -> Bool
 noNothingsRow (x:[]) =
     case x of
         Just _ -> True
@@ -208,16 +190,15 @@ blank (Sudoku s) =
         [] -> Nothing
         _ -> Just $ head blanks
     
-    
 -- |Returns all blank positions in the given Sudoku.
-allBlanks :: [[Maybe Int]] -> [Pos]
+allBlanks :: [Block] -> [Pos]
 allBlanks rs =
     let     indices = [(i, j) | i <- [0..8], j <- [0..8]]
     in      filter (\pos -> isBlank pos rs) indices
 
 -- |Returns True if and only if the position in the given
 --  Sudoku is blank
-isBlank :: Pos -> [[Maybe Int]] -> Bool
+isBlank :: Pos -> [Block] -> Bool
 isBlank (i, j) rs =
     (rs !! i !! j) == Nothing
 
@@ -248,3 +229,7 @@ isUpdated (Sudoku s) (x, y) n =
 
 solve :: Sudoku -> Maybe Sudoku
 solve sud = undefined
+
+
+
+

@@ -1,10 +1,6 @@
 module SudokuExamples where
 
-import Data.Char
-import Data.List
-import Data.Maybe
-import Data.List.Split
-import System.Random
+import Sudoku
 
 example1 :: Sudoku
 example1 = Sudoku
