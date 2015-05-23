@@ -20,10 +20,10 @@ type Pos = (Int, Int)
 solve :: Sudoku -> Maybe Sudoku
 solve sud = 
     case isOkay sud of
-        False -> Nothing
-        True -> 
+        False   -> Nothing
+        True    -> 
             case blank sud of
-                Nothing -> Just sud
+                Nothing     -> Just sud
                 Just (x, y) ->
                     let     toSolve = update sud (x, y)
                             allPossible = map toSolve [Just n | n <- [1..9]]
@@ -36,8 +36,8 @@ firstSolution :: [Maybe Sudoku] -> Maybe Sudoku
 firstSolution [] = Nothing
 firstSolution (x:xs) =
     case x of
-        Nothing -> firstSolution xs
-        _ -> x
+        Nothing     -> firstSolution xs
+        _           -> x
       
 -- |Extract rows from a given Sudoku.
 rows :: Sudoku -> [Block]
@@ -101,14 +101,14 @@ allValidEntries (r:rs) = validRow r && allValidEntries rs
 validRow :: Block -> Bool
 validRow (x:[]) =
     case x of
-        Just _ -> True
+        Just _  -> True
         Nothing -> True
-        _ -> False
+        _       -> False
 validRow (x:xs) =
     case x of
-        Just _ -> True && validRow xs
+        Just _  -> True && validRow xs
         Nothing -> True && validRow xs
-        _ -> False
+        _       -> False
 
 -- |Returns True if and only if the Sudoku is solved.
 isSolved :: Sudoku -> Bool
@@ -124,11 +124,11 @@ noNothings (r:rs) = noNothingsRow r && noNothings rs
 noNothingsRow :: Block -> Bool
 noNothingsRow (x:[]) =
     case x of
-        Just _ -> True
+        Just _  -> True
         Nothing -> False
 noNothingsRow (x:xs) =
     case x of
-        Just _ -> True && noNothingsRow xs
+        Just _  -> True && noNothingsRow xs
         Nothing -> False
 
 -- |Returns True if and only if the given Block is valid.
@@ -136,7 +136,7 @@ isOkayBlock :: Block -> Bool
 isOkayBlock [] = True
 isOkayBlock (b:bs) =
     case b of
-        Just x -> (not $ b `elem` bs) && isOkayBlock bs
+        Just x  -> (not $ b `elem` bs) && isOkayBlock bs
         Nothing -> isOkayBlock bs
 
 -- |Returns all Blocks of the given Sudoku.
@@ -245,7 +245,7 @@ maybeToString :: Block -> String
 maybeToString [] = []
 maybeToString (x:xs) =
     case x of
-        Just n -> (show n) ++ " " ++ maybeToString xs
+        Just n  -> (show n) ++ " " ++ maybeToString xs
         Nothing -> ". " ++ maybeToString xs
 
  
