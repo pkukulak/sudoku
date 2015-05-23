@@ -35,8 +35,8 @@ maybeToString :: Block -> String
 maybeToString [] = []
 maybeToString (x:xs) =
     case x of
-        Just n -> (show n) ++ maybeToString xs
-        Nothing -> '.' : maybeToString xs
+        Just n -> (show n) ++ " " ++ maybeToString xs
+        Nothing -> " . " ++ maybeToString xs
 
 {- ########## CODE TO ###########
    ####### READ SUDOKUS ######### -}
