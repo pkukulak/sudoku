@@ -15,57 +15,30 @@ data Sudoku = Sudoku [[Maybe Int]]
 type Block = [Maybe Int]
 type Pos = (Int, Int)
 
-{- ########### CODE TO ##########
-   ######## PRINT SUDOKUS ####### -}
--- |Prints a Sudoku puzzle.
-printSudoku :: Sudoku -> IO ()
-printSudoku s =
-    let     sudokuStr = sudokuToString $ rows s
-    in      mapM_ putStrLn $ init sudokuStr
+-- |Solves a given Sudoku. Returns Nothing if there is
+--  no solution.
+solve :: Sudoku -> Maybe Sudoku
+solve sud = 
+    case isOkay sud of
+        False -> Nothing
+        True -> 
+            case blank sud of
+                Nothing -> Just sud
+                Just (x, y) ->
+                    let     toSolve = update sud (x, y)
+                            allPossible = map toSolve [Just n | n <- [1..9]]
+                            solveAll = map solve allPossible
+                    in      firstSolution solveAll
 
--- |Converts a Sudoku into a list of Strings.
-sudokuToString :: [Block] -> [String]
-sudokuToString [] = [[]]
-sudokuToString (r:rs) =
-    maybeToString r : sudokuToString rs
-
--- |Converts a list of Maybe Ints to a String.
---  Could probably be written in a cleaner way.
-maybeToString :: Block -> String
-maybeToString [] = []
-maybeToString (x:xs) =
+-- |Returns the first solution in a list of all possible
+--  solutions to a Sudoku.                        
+firstSolution :: [Maybe Sudoku] -> Maybe Sudoku
+firstSolution [] = Nothing
+firstSolution (x:xs) =
     case x of
-        Just n -> (show n) ++ " " ++ maybeToString xs
-        Nothing -> ". " ++ maybeToString xs
-
-{- ########## CODE TO ###########
-   ####### READ SUDOKUS ######### -}
--- |Reads a Sudoku puzzle from an input file.
-readSudoku :: FilePath -> IO Sudoku
-readSudoku path =
-    do
-        content <- readFile path
-        let     linesOfFile = lines content
-        return $ Sudoku (init (linesToSudoku linesOfFile))
-
--- |Reads a list of Strings representing all rows
---  of a Sudoku puzzle and converts it into a list of
---  list of Maybe Int.
-linesToSudoku :: [String] -> [Block]
-linesToSudoku [] = [[]]
-linesToSudoku (l:ls) =
-    sudokuLine l : linesToSudoku ls
-
--- |Reads a single String representing a single
---  row of a Sudoku puzzle, converting it to a list
---  Maybe Int.
-sudokuLine :: String -> Block
-sudokuLine [] = []
-sudokuLine (x:xs) =
-    case x of
-        '.' -> Nothing : sudokuLine xs
-        c -> Just (digitToInt c) : sudokuLine xs
-        
+        Nothing -> firstSolution xs
+        _ -> x
+      
 -- |Extract rows from a given Sudoku.
 rows :: Sudoku -> [Block]
 rows (Sudoku rs) = rs
@@ -224,26 +197,55 @@ isUpdated (Sudoku s) (x, y) n =
     let     rs = rows (Sudoku s)
     in      (rs !! x !! y) == n
 
--- |Solves a given Sudoku. Returns Nothing if there is
---  no solution.
-solve :: Sudoku -> Maybe Sudoku
-solve sud = 
-    case isOkay sud of
-        False -> Nothing
-        True -> 
-            case blank sud of
-                Nothing -> Just sud
-                Just (x, y) ->
-                    let     toSolve = update sud (x, y)
-                            allPossible = map toSolve [Just n | n <- [1..9]]
-                            solveAll = map solve allPossible
-                    in      firstSolution solveAll
+{- ########## CODE TO ###########
+   ####### READ SUDOKUS ######### -}
+-- |Reads a Sudoku puzzle from an input file.
+readSudoku :: FilePath -> IO Sudoku
+readSudoku path =
+    do
+        content <- readFile path
+        let     linesOfFile = lines content
+        return $ Sudoku (init (linesToSudoku linesOfFile))
 
--- |Returns the first solution in a list of all possible
---  solutions to a Sudoku.                        
-firstSolution :: [Maybe Sudoku] -> Maybe Sudoku
-firstSolution [] = Nothing
-firstSolution (x:xs) =
+-- |Reads a list of Strings representing all rows
+--  of a Sudoku puzzle and converts it into a list of
+--  list of Maybe Int.
+linesToSudoku :: [String] -> [Block]
+linesToSudoku [] = [[]]
+linesToSudoku (l:ls) =
+    sudokuLine l : linesToSudoku ls
+
+-- |Reads a single String representing a single
+--  row of a Sudoku puzzle, converting it to a list
+--  Maybe Int.
+sudokuLine :: String -> Block
+sudokuLine [] = []
+sudokuLine (x:xs) =
     case x of
-        Nothing -> firstSolution xs
-        _ -> x
+        '.' -> Nothing : sudokuLine xs
+        c -> Just (digitToInt c) : sudokuLine xs
+
+ {- ########### CODE TO ##########
+   ######## PRINT SUDOKUS ####### -}
+-- |Prints a Sudoku puzzle.
+printSudoku :: Sudoku -> IO ()
+printSudoku s =
+    let     sudokuStr = sudokuToString $ rows s
+    in      mapM_ putStrLn $ init sudokuStr
+
+-- |Converts a Sudoku into a list of Strings.
+sudokuToString :: [Block] -> [String]
+sudokuToString [] = [[]]
+sudokuToString (r:rs) =
+    maybeToString r : sudokuToString rs
+
+-- |Converts a list of Maybe Ints to a String.
+--  Could probably be written in a cleaner way.
+maybeToString :: Block -> String
+maybeToString [] = []
+maybeToString (x:xs) =
+    case x of
+        Just n -> (show n) ++ " " ++ maybeToString xs
+        Nothing -> ". " ++ maybeToString xs
+
+ 
